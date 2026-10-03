@@ -1,7 +1,9 @@
 import { sources as fallbackSources, type SourceKind, type SourceRecord } from '../data/sources';
+import { workflowSamples } from './workflows/samples';
+import type { PrivacyAction, PublicWorkflowEvidenceV1 } from './workflows/contracts';
 import './style.css';
 
-type View = 'overview' | 'sources' | 'method';
+type View = 'overview' | 'sources' | 'workflows' | 'method';
 let activeView: View = 'overview';
 let activeFilter = 'All sources';
 let searchTerm = '';
@@ -54,8 +56,47 @@ const icon = (name: string, size = 18) => {
 const navItems: { id: View; label: string; glyph: string; badge?: string }[] = [
   { id: 'overview', label: 'Overview', glyph: 'grid' },
   { id: 'sources', label: 'Source library', glyph: 'layers', badge: `${sourceCatalog.length}` },
+  { id: 'workflows', label: 'Request paths', glyph: 'route', badge: `${workflowSamples.length}` },
   { id: 'method', label: 'Our method', glyph: 'route' },
 ];
+
+const actionLabels: Record<PrivacyAction, string> = {
+  delete: 'Delete personal data',
+  suppress: 'Suppress a specific listing',
+  opt_out_sale_sharing: 'Opt out of sale or sharing',
+  opt_out_targeted_ads: 'Opt out of targeted ads',
+  limit_sensitive_use: 'Limit sensitive data use',
+  access: 'Request a copy of data',
+  correct: 'Correct personal data',
+  unknown: 'Check available privacy choices',
+};
+
+const brokerLabels: Record<string, string> = {
+  epsilon: 'Epsilon',
+  'lexisnexis-risk-solutions': 'LexisNexis Risk Solutions',
+};
+
+function workflowCard(workflow: PublicWorkflowEvidenceV1): string {
+  const sourceHost = new URL(workflow.evidence.sourceUrl).hostname;
+  return `<article class="workflow-card">
+    <div class="workflow-card-top"><span class="workflow-broker">${escapeHtml(brokerLabels[workflow.subject.id] ?? workflow.subject.id)}</span><span class="workflow-reviewed">${workflow.reviewStatus === 'human_verified' ? 'Reviewed Oct 3, 2026' : 'Review needed'}</span></div>
+    <h2>${escapeHtml(actionLabels[workflow.action])}</h2>
+    <div class="workflow-route">${escapeHtml(workflow.channel.replaceAll('_', ' '))}${workflow.jurisdiction ? ` · ${escapeHtml(workflow.jurisdiction)}` : ''}</div>
+    <dl class="workflow-details">
+      <div><dt>Scope</dt><dd>${escapeHtml(workflow.scopeSummary ?? 'See the provider’s instructions.')}</dd></div>
+      ${workflow.verificationSummary ? `<div><dt>Verification</dt><dd>${escapeHtml(workflow.verificationSummary)}</dd></div>` : ''}
+      ${workflow.limitationsSummary ? `<div><dt>Limits</dt><dd>${escapeHtml(workflow.limitationsSummary)}</dd></div>` : ''}
+      <div><dt>Authorized agent</dt><dd>${workflow.agentSupport === 'yes' ? 'Provider describes an agent route' : workflow.agentSupport === 'no' ? 'Provider says agents are not accepted' : 'Not confirmed in reviewed instructions'}</dd></div>
+    </dl>
+    <div class="workflow-card-footer"><span>Source: ${escapeHtml(sourceHost)}</span><a href="${escapeHtml(safeExternalUrl(workflow.destinationUrl ?? workflow.evidence.sourceUrl))}" target="_blank" rel="noreferrer">Open provider instructions ${icon('external', 14)}</a></div>
+  </article>`;
+}
+
+function workflowsPage(): string {
+  return `<section class="page-intro"><div class="eyebrow">REQUEST PATHS <span class="eyebrow-count">${workflowSamples.length.toString().padStart(2, '0')} REVIEWED EXAMPLES</span></div><h1>One action<br /><em>at a time.</em></h1><p>These examples show how broker privacy routes differ. Read the scope and requirements, then continue directly with the provider. Unlisted does not submit requests.</p></section>
+  <section class="workflow-list">${workflowSamples.map(workflowCard).join('')}</section>
+  <aside class="workflow-disclaimer"><strong>Research sample, not a complete directory.</strong><span>Broker instructions can change. Vermont and Oregon broker-specific registry membership still needs interactive human verification. The state searches were not bypassed.</span></aside>`;
+}
 
 function sourceCard(source: SourceRecord, index: number): string {
   const kindClass =
@@ -162,9 +203,15 @@ async function loadPublicDirectoryData(): Promise<void> {
 
 function render(): void {
   const content =
-    activeView === 'sources' ? sourcesPage() : activeView === 'method' ? methodPage() : overview();
+    activeView === 'sources'
+      ? sourcesPage()
+      : activeView === 'workflows'
+        ? workflowsPage()
+        : activeView === 'method'
+          ? methodPage()
+          : overview();
   document.querySelector<HTMLDivElement>('#app')!.innerHTML =
-    `<div class="app-shell"><aside class="sidebar"><a class="brand" href="#overview" data-view="overview"><span class="brand-mark"><span></span><span></span><span></span></span><span>unlisted<span class="brand-period">.</span></span></a><div class="workspace-label">PUBLIC DIRECTORY</div><nav class="main-nav" aria-label="Main navigation">${navItems.map((item) => `<button class="nav-item ${activeView === item.id ? 'active' : ''}" data-view="${item.id}"><span class="nav-glyph">${icon(item.glyph, 17)}</span><span>${item.label}</span>${item.badge ? `<span class="nav-badge">${item.badge}</span>` : ''}</button>`).join('')}</nav><div class="sidebar-bottom"><div class="sidebar-status"><span class="status-mark"><span></span></span><div><strong>Research phase</strong><small>Registry ingestion next</small></div></div><a href="https://github.com/SecuritahGuy/Unlisted" class="github-link" target="_blank" rel="noreferrer">Open project on GitHub ${icon('external', 14)}</a><div class="sidebar-foot">BUILT FOR CLARITY <span>·</span> 2026</div></div></aside><main class="main-content"><header class="topbar"><div class="breadcrumb"><span>UNLISTED</span>${icon('chevron', 13)}<strong>${activeView === 'overview' ? 'Overview' : activeView === 'sources' ? 'Source library' : 'Our method'}</strong></div><div class="topbar-right"><span class="public-badge"><span></span> RESEARCH PREVIEW</span><button class="mobile-menu" aria-label="Open navigation">${icon('menu', 19)}</button><div class="avatar">U</div></div></header><div class="content-wrap">${content}<footer class="page-footer"><span>UNLISTED © 2026</span><span>Privacy intelligence, with receipts.</span><a href="https://github.com/SecuritahGuy/Unlisted" target="_blank" rel="noreferrer">Open source project ${icon('external', 13)}</a></footer></div></main></div>`;
+    `<div class="app-shell"><aside class="sidebar"><a class="brand" href="#overview" data-view="overview"><span class="brand-mark"><span></span><span></span><span></span></span><span>unlisted<span class="brand-period">.</span></span></a><div class="workspace-label">PUBLIC DIRECTORY</div><nav class="main-nav" aria-label="Main navigation">${navItems.map((item) => `<button class="nav-item ${activeView === item.id ? 'active' : ''}" data-view="${item.id}"><span class="nav-glyph">${icon(item.glyph, 17)}</span><span>${item.label}</span>${item.badge ? `<span class="nav-badge">${item.badge}</span>` : ''}</button>`).join('')}</nav><div class="sidebar-bottom"><div class="sidebar-status"><span class="status-mark"><span></span></span><div><strong>Research phase</strong><small>Registry ingestion next</small></div></div><a href="https://github.com/SecuritahGuy/Unlisted" class="github-link" target="_blank" rel="noreferrer">Open project on GitHub ${icon('external', 14)}</a><div class="sidebar-foot">BUILT FOR CLARITY <span>·</span> 2026</div></div></aside><main class="main-content"><header class="topbar"><div class="breadcrumb"><span>UNLISTED</span>${icon('chevron', 13)}<strong>${activeView === 'overview' ? 'Overview' : activeView === 'sources' ? 'Source library' : activeView === 'workflows' ? 'Request paths' : 'Our method'}</strong></div><div class="topbar-right"><span class="public-badge"><span></span> RESEARCH PREVIEW</span><button class="mobile-menu" aria-label="Open navigation">${icon('menu', 19)}</button><div class="avatar">U</div></div></header><div class="content-wrap">${content}<footer class="page-footer"><span>UNLISTED © 2026</span><span>Privacy intelligence, with receipts.</span><a href="https://github.com/SecuritahGuy/Unlisted" target="_blank" rel="noreferrer">Open source project ${icon('external', 13)}</a></footer></div></main></div>`;
   bindEvents();
 }
 

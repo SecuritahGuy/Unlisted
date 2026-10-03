@@ -17,39 +17,29 @@
 
 The Vermont source is useful because it points people to the broker record and requires eligible registration disclosures about opt-out methods and scope. It does not make one request to Vermont that removes information from every broker. A person follows the broker's stated route (or applicable privacy-rights portal), supplies whatever matching/verification information that route requests, and tracks the broker's response. Vermont's registry search is linked from its [Data Broker page](https://sos.vermont.gov/business-services/other-filings/data-broker); the current statutory disclosure is in [§ 2446](https://legislature.vermont.gov/statutes/section/09/062/02446).
 
-The Vermont public search required an interactive validation step during this review, so we did not capture or claim a current individual broker filing. The next verification pass should manually inspect a small set of named broker records, then compare the declared method with the broker's live privacy page. Store discrepancies as separate observations, not silent corrections.
+The Vermont public search required interactive validation during this review, so we did not capture or claim a current individual broker filing. Oregon's official license lookup also required CAPTCHA validation after read-only broker searches. We did not bypass either gate, and no named broker's current Vermont/Oregon registration status is asserted here. The next verification pass should have a human inspect a few state records, then compare each declared method with the broker's live privacy page. Store discrepancies as separate observations, not silent corrections.
+
+## Named broker workflow samples
+
+These are first-party instructions observed on October 3, 2026. They are public business-level route summaries only; no profile lookup or form submission was performed.
+
+### Epsilon
+
+- Its current privacy notice describes a web form or phone route for deletion and other privacy choices, identity confirmation, and written proof for authorized agents. It also says data processed strictly on behalf of a client follows the client's notice and request route. See the [privacy notice](https://legal.epsilon.com/us/NA-products-privacy-policy) and [request portal](https://legal.epsilon.com/dsr/).
+- Its consumer information page separately describes a marketing opt-out as marking a record “Do Not Share,” not deleting it, and says that route covers Epsilon's marketing databases only. That page separately describes a verifiable deletion request. Preserve this page's statement as its own time-stamped evidence; do not silently merge it with the newer notice's broader rights description. See [Epsilon consumer information](https://legal.epsilon.com/us/consumer-information).
+
+### LexisNexis Risk Solutions
+
+- The [consumer request portal](https://consumer.risk.lexisnexis.com/request) offers full sale/share opt-out, partial opt-out, deletion, access, and correction options. It says SSN or driver's-license details are not required for an opt-out but are required to request deletion or a report; the portal verifies identity and matching.
+- Its separate [opt-out page](https://consumer.risk.lexisnexis.com/opt) distinguishes direct-marketing and prescreen opt-outs from safety-based information suppression. The latter applies only to specified company-owned restricted public-record products, requires documentation, and excludes law-enforcement and FCRA-regulated products. The privacy notice describes authorized-agent requirements. See the [LexisNexis U.S. Consumer Privacy Notice](https://risk.lexisnexis.com/state-privacy-act-notice).
+
+The current examples are in [the read-only workflow sample module](../../src/workflows/samples.ts). They label the broker as the subject and preserve each route as a separate evidence record. Vermont/Oregon registration membership remains unverified pending human validation of the state searches.
 
 ## Initial workflow record for Unlisted
 
-Do not create a D1 migration from this sample alone. First establish a versioned workflow contract that stays separate from the registry/source record contract:
+Do not create a D1 migration from this sample alone. A versioned workflow contract now lives in [`src/workflows/contracts.ts`](../../src/workflows/contracts.ts), separate from the registry/source record contract. It is validated at runtime, accepts only explicit public-evidence fields, and rejects unknown properties. This prevents quietly adding a consumer name, email, profile match, identity-verification answer, or submitted request payload to public workflow evidence.
 
-```ts
-type PrivacyAction =
-  | 'delete'
-  | 'suppress'
-  | 'opt_out_sale_sharing'
-  | 'opt_out_targeted_ads'
-  | 'limit_sensitive_use'
-  | 'access'
-  | 'correct'
-  | 'unknown';
-
-interface PublicWorkflowEvidence {
-  subjectId: string; // canonical broker, brand, or shared provider
-  jurisdiction?: string;
-  action: PrivacyAction;
-  channel: 'web_form' | 'email' | 'phone' | 'mail' | 'state_portal' | 'other';
-  destination?: string;
-  scopeSummary?: string;
-  agentAllowed?: 'yes' | 'no' | 'unclear';
-  verificationSummary?: string;
-  limitationsSummary?: string;
-  sourceUrl: string;
-  sourceKind: 'government_registry' | 'broker_privacy_notice' | 'broker_request_portal';
-  observedAt: string;
-  reviewStatus: 'unreviewed' | 'human_verified' | 'stale';
-}
-```
+The contract includes schema version, evidence ID, stable subject reference, jurisdiction, a distinct action and channel, destination, scope, agent support, verification and limitations summaries, provenance, observation time, optional content digest, and review status. See [`src/workflows/samples.ts`](../../src/workflows/samples.ts) for five first-party example records.
 
 The record should point to public instructions and summarize what they claim. It must not contain a user's name, address, email, profile match, government ID, verification response, or submitted request payload. `scopeSummary`, `verificationSummary`, and `limitationsSummary` are broker/state instructions, not legal advice or a guarantee of outcome.
 
@@ -68,4 +58,4 @@ The record should point to public instructions and summarize what they claim. It
 - Registry facts and broker-page instructions can differ. Preserve provenance and review state per claim.
 - A user journey can be useful without automated submission: explain the action and scope, send the person to the correct first-party route, and help them keep track.
 - Workflow research should remain read-only. Automated submissions require a separately approved product, identity-data, authorization, and security design under the existing [agent guide](../../AGENTS.md).
-- Next: manually verify a small sample of named Vermont and Oregon records plus two broker-owned portals, then agree the workflow contract before adding adapters or migrations. Keep the existing CPPA reuse decision separate; this note does not resolve it.
+- Next: have a human complete the interactive Vermont/Oregon registry lookups and record named registration evidence; then review the sample summaries and contract for product language before designing D1 persistence. Keep the existing CPPA reuse decision separate; this note does not resolve it.

@@ -858,6 +858,97 @@ a {
 .library-section .source-tools {
   margin-top: 0;
 }
+.workflow-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  padding-bottom: 18px;
+}
+.workflow-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 17px;
+  background: var(--paper);
+  border: 1px solid #e7e6de;
+  border-radius: 6px;
+}
+.workflow-card-top,
+.workflow-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 9px;
+}
+.workflow-broker {
+  color: #617044;
+  font: 600 10px var(--mono);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.workflow-reviewed {
+  color: #858a7a;
+  font: 9px var(--mono);
+}
+.workflow-card h2 {
+  margin: 18px 0 5px;
+  font: 600 18px var(--display);
+  letter-spacing: -0.5px;
+}
+.workflow-route {
+  color: #8b8e82;
+  font: 9px var(--mono);
+  text-transform: capitalize;
+}
+.workflow-details {
+  display: grid;
+  gap: 12px;
+  margin: 18px 0;
+}
+.workflow-details div {
+  display: grid;
+  grid-template-columns: 90px minmax(0, 1fr);
+  gap: 10px;
+}
+.workflow-details dt {
+  color: #777d70;
+  font: 9px var(--mono);
+  text-transform: uppercase;
+}
+.workflow-details dd {
+  margin: 0;
+  color: #555b51;
+  font-size: 11px;
+  line-height: 1.55;
+}
+.workflow-card-footer {
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  color: #85887e;
+  font: 9px var(--mono);
+}
+.workflow-card-footer a {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #68794a;
+  font: 600 10px var(--display);
+}
+.workflow-disclaimer {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 22px;
+  padding: 13px 15px;
+  border-left: 3px solid #b4cb63;
+  background: #eff1e7;
+  color: #70776a;
+  font-size: 10px;
+  line-height: 1.5;
+}
+.workflow-disclaimer strong {
+  color: #414b3e;
+}
 .license-note {
   display: flex;
   align-items: flex-start;
@@ -1198,6 +1289,14 @@ a {
   .method-grid {
     grid-template-columns: 1fr;
     gap: 8px;
+  }
+  .workflow-list {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .workflow-card-footer {
+    align-items: flex-start;
+    flex-direction: column;
   }
   .method-card {
     min-height: 170px;
