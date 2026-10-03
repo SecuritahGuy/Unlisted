@@ -8,9 +8,11 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "cf:types": "wrangler types",
+    "ingest:cppa:preview": "node scripts/preview-cppa-2025.mjs --dry-run",
+    "test:ingestion": "node --test tests/ingestion/*.test.mjs",
     "deploy": "npm run build && wrangler deploy",
-    "format": "prettier --write index.html src data vite.config.ts tsconfig.json wrangler.jsonc package.json .github/workflows/checks.yml",
-    "format:check": "prettier --check index.html src data vite.config.ts tsconfig.json wrangler.jsonc package.json .github/workflows/checks.yml"
+    "format": "prettier --write index.html src data scripts tests README.md vite.config.ts tsconfig.json wrangler.jsonc package.json .github/workflows/checks.yml",
+    "format:check": "prettier --check index.html src data scripts tests README.md vite.config.ts tsconfig.json wrangler.jsonc package.json .github/workflows/checks.yml"
   },
   "devDependencies": {
     "prettier": "^3.9.9",

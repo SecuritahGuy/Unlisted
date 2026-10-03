@@ -1,11 +1,11 @@
-import { parseCsv } from '../csv';
+import { parseCsv } from '../csv.ts';
 import type {
   IngestionContext,
   RawSourceObservation,
   SourceConnector,
   SourceManifest,
-} from '../contracts';
-import { validateObservation, validateSourceManifest } from '../validation';
+} from '../contracts.ts';
+import { validateObservation, validateSourceManifest } from '../validation.ts';
 
 export const cppa2025Manifest: SourceManifest = {
   id: 'cppa-2025',
@@ -19,6 +19,8 @@ export const cppa2025Manifest: SourceManifest = {
   notes:
     'Official historical snapshot. Review source terms and allowed reuse before persisting or publishing records. Its CSV includes field-level instructions not to surface some unanswered fields; see docs/research/cppa-2025.md.',
 };
+
+const maximumDownloadBytes = 10 * 1024 * 1024;
 
 const normalizeHeader = (header: string): string =>
   header
@@ -58,11 +60,16 @@ async function sha256(value: string): Promise<string> {
 
 export class Cppa2025Connector implements SourceConnector {
   readonly manifest = cppa2025Manifest;
+  private readonly request: typeof fetch;
+
+  constructor(request: typeof fetch = fetch) {
+    this.request = request;
+  }
 
   async *collect(context: IngestionContext): AsyncIterable<RawSourceObservation> {
     validateSourceManifest(this.manifest);
 
-    const response = await fetch(this.manifest.sourceUrl, {
+    const response = await this.request(this.manifest.sourceUrl, {
       headers: { accept: 'text/csv' },
       signal: context.signal,
     });
@@ -70,7 +77,20 @@ export class Cppa2025Connector implements SourceConnector {
       throw new Error(`CPPA registry download failed with HTTP ${response.status}.`);
     }
 
+    const contentType = response.headers.get('content-type')?.toLowerCase() ?? '';
+    if (contentType && !contentType.includes('csv') && !contentType.includes('text/plain')) {
+      throw new Error(`CPPA download returned unexpected content type: ${contentType}.`);
+    }
+    const declaredLength = Number(response.headers.get('content-length'));
+    if (Number.isFinite(declaredLength) && declaredLength > maximumDownloadBytes) {
+      throw new Error('CPPA registry download exceeded the 10 MiB safety limit.');
+    }
+
     const csv = await response.text();
+    if (!csv.trim()) throw new Error('CPPA registry download was empty.');
+    if (new TextEncoder().encode(csv).byteLength > maximumDownloadBytes) {
+      throw new Error('CPPA registry download exceeded the 10 MiB safety limit.');
+    }
     const rows = parseCsv(csv);
     const headerRowIndex = rows.findIndex((row) =>
       row.some((cell) => normalizeHeader(cell).toLowerCase() === 'data broker name'),
@@ -80,11 +100,13 @@ export class Cppa2025Connector implements SourceConnector {
     }
 
     const headers = uniqueHeaders(rows[headerRowIndex]);
+    if (headers.length < 2) throw new Error('CPPA CSV header row is incomplete.');
     const nameIndex = headerIndex(headers, 'data broker name');
     const websiteIndex = headerIndex(headers, 'data broker primary website');
     if (nameIndex < 0) throw new Error('CPPA CSV is missing the broker name column.');
 
     const duplicateKeys = new Map<string, number>();
+    let emitted = 0;
     for (const [offset, cells] of rows.slice(headerRowIndex + 1).entries()) {
       if (cells.length !== headers.length) {
         throw new Error(
@@ -112,8 +134,10 @@ export class Cppa2025Connector implements SourceConnector {
         ingestionRunId: context.runId,
       };
       validateObservation(observation);
+      emitted += 1;
       yield observation;
     }
+    if (emitted === 0) throw new Error('CPPA CSV contained no broker records.');
   }
 }
 

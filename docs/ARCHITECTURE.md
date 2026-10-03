@@ -6,9 +6,10 @@ This is a domain map and initial runtime recommendation. See [decision 0001](dec
 
 - The public site currently presents the source candidates and project method; it does not publish broker rows.
 - `src/ingestion/contracts.ts` defines source manifests, immutable observations, connector boundaries, and normalized broker candidates.
-- `src/ingestion/sources/cppa-2025.ts` reads the official 2025 CPPA CSV format as a manually invoked, read-only connector. It is not wired to database persistence.
+- `src/ingestion/sources/cppa-2025.ts` reads the official 2025 CPPA CSV format as a manually invoked, read-only connector. `npm run ingest:cppa:preview` validates the live file in memory and prints aggregate counts; it is not wired to database persistence.
 - `migrations/0001_initial.sql` drafts the first D1 tables for sources, ingestion runs, immutable observations, broker identities, aliases, and registrations.
 - The CPPA source remains marked for license review. Do not persist or publish its records until reuse terms are approved and represented in source metadata.
+- The live CPPA 2025 snapshot validated 543 rows on 2026-10-03. It is historical, contains some metrics labeled 2023, and has no dataset-specific reuse statement identified yet. Stable source keys and field-level storage/display rules must be decided before persistent ingestion.
 
 ## Recommended runtime direction
 

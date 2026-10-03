@@ -39,3 +39,5 @@ Create a production build with `npm run build`. Connect the GitHub repository to
 ## Ingestion foundation
 
 The first D1 schema draft is in `migrations/0001_initial.sql`; source connector types and input validation are in `src/ingestion/`. A connector emits immutable source observations and does not execute privacy requests. Before applying the migration, create the D1 database and add its binding/database ID to `wrangler.jsonc`; keep production IDs and secrets out of Git.
+
+The CPPA 2025 connector can be previewed with `npm run ingest:cppa:preview`. It downloads and validates the CSV, then prints aggregate run metadata without retaining broker values or writing to D1. The source remains `review-required`; persistence must wait for documented reuse approval and an approved field mapping. Run its offline deterministic checks with `npm run test:ingestion`.
