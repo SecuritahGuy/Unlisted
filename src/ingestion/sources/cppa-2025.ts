@@ -102,28 +102,50 @@ export class Cppa2025Connector implements SourceConnector {
     const headers = uniqueHeaders(rows[headerRowIndex]);
     if (headers.length < 2) throw new Error('CPPA CSV header row is incomplete.');
     const nameIndex = headerIndex(headers, 'data broker name');
+    const dbaIndex = headerIndex(headers, 'doing business as');
     const websiteIndex = headerIndex(headers, 'data broker primary website');
     if (nameIndex < 0) throw new Error('CPPA CSV is missing the broker name column.');
 
-    const duplicateKeys = new Map<string, number>();
-    let emitted = 0;
-    for (const [offset, cells] of rows.slice(headerRowIndex + 1).entries()) {
+    const records = rows.slice(headerRowIndex + 1).flatMap((cells, offset) => {
       if (cells.length !== headers.length) {
         throw new Error(
           `CPPA CSV row ${headerRowIndex + offset + 2} has ${cells.length} cells; expected ${headers.length}.`,
         );
       }
-
-      const rawRecord = Object.fromEntries(headers.map((header, index) => [header, cells[index]]));
       const name = cells[nameIndex].trim();
-      if (!name) continue;
+      return name ? [{ cells, name }] : [];
+    });
+    const primaryKeyCounts = new Map<string, number>();
+    for (const { cells, name } of records) {
+      const dba = dbaIndex >= 0 ? cells[dbaIndex].trim() : '';
+      const primaryKey = JSON.stringify([normalizeName(name), normalizeName(dba)]);
+      primaryKeyCounts.set(primaryKey, (primaryKeyCounts.get(primaryKey) ?? 0) + 1);
+    }
 
+    const usedKeys = new Set<string>();
+    let emitted = 0;
+    for (const { cells, name } of records) {
+      const rawRecord = Object.fromEntries(headers.map((header, index) => [header, cells[index]]));
+      const dba = dbaIndex >= 0 ? cells[dbaIndex].trim() : '';
       const website = websiteIndex >= 0 ? cells[websiteIndex].trim() : '';
       const host = website ? safeHostname(website) : '';
-      const baseKey = `${normalizeName(name)}${host ? `--${normalizeName(host)}` : ''}`;
-      const ordinal = (duplicateKeys.get(baseKey) ?? 0) + 1;
-      duplicateKeys.set(baseKey, ordinal);
-      const sourceRecordKey = `csv:${baseKey}:${ordinal}`;
+      const primaryKey = JSON.stringify([normalizeName(name), normalizeName(dba)]);
+      const identity = [normalizeName(name), normalizeName(dba)];
+      if ((primaryKeyCounts.get(primaryKey) ?? 0) > 1) {
+        if (!host) {
+          throw new Error(
+            'CPPA contains ambiguous duplicate broker identities without a website host.',
+          );
+        }
+        identity.push(normalizeName(host));
+      }
+      const sourceRecordKey = `derived-v1:${await sha256(JSON.stringify(identity))}`;
+      if (usedKeys.has(sourceRecordKey)) {
+        throw new Error(
+          'CPPA contains duplicate broker identity fields; cannot assign stable source keys.',
+        );
+      }
+      usedKeys.add(sourceRecordKey);
       const recordHash = await sha256(JSON.stringify(rawRecord));
       const observation: RawSourceObservation = {
         sourceId: this.manifest.id,
