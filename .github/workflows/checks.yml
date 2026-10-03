@@ -24,5 +24,7 @@ jobs:
         run: npm run format:check
       - name: Run ingestion checks
         run: npm run test:ingestion
+      - name: Check D1 migrations and policy gates
+        run: npm run test:d1-schema
       - name: Build website
         run: npm run build

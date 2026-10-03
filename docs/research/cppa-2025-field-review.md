@@ -47,7 +47,7 @@ Every future displayed value should be labeled as broker-reported, cite the CPPA
 
 ## Persistence design implication
 
-The current `source_observations.raw_record_json` column represents a full raw source row. It must not be used to store the complete CPPA row if the approved disposition only permits a reduced projection. Before persistence, decide whether to retain a permitted full snapshot or instead store a digest and approved-field evidence separately, then make the schema and retention behavior match that decision. Preserve the public CSV's full-row hash for integrity only if approved; a hash is not a substitute for retaining reviewable evidence.
+The current `source_observations.raw_record_json` column represents a full raw source row. Migration 0003 adds a database trigger that blocks its use unless a separate full-payload policy is approved. It also adds a minimized observation path with no raw payload column and pending per-field storage/display decisions. Preserve only a digest of the approved projection on that path. Before persistence, the disposition must say whether a full snapshot is permitted or only approved-field evidence may be retained; a hash is not a substitute for retaining reviewable evidence.
 
 ## Remaining review questions
 
@@ -57,3 +57,33 @@ The current `source_observations.raw_record_json` column represents a full raw s
 4. What refresh/revision policy applies to the historical 2025 file, and how should corrected submissions be represented?
 
 No request has been sent to CPPA. This document records public-source findings and a proposed minimization boundary; it is not a legal determination.
+
+## Draft clarification request (not sent)
+
+**Subject:** Reuse and field-display clarification for the 2025 California Data Broker Registry CSV
+
+Hello CPPA team,
+
+We are developing Unlisted, a public privacy-intelligence directory that links to official sources and labels registry entries as broker-reported. We are reviewing the 2025 Data Broker Registry CSV before storing or displaying any submitted values.
+
+Could you clarify whether CPPA permits third parties, including a commercially hosted public directory, to store and republish selected values from this CSV? Our proposed initial projection is limited to the business name (A), a nonblank DBA (B), the primary business website (C), and the CCPA consumer-rights/deletion URL (O). We would attribute those fields to CPPA and label them as 2025 broker submissions. We would exclude contact details, physical addresses, statutory coverage details, request metrics, and free-text explanations.
+
+Does the registry CSV or registration form have additional terms that govern reuse of submitted responses? Is there a preferred attribution or correction process? We will honor the CSV instruction not to surface the specified fields when unanswered.
+
+Thank you,
+Unlisted project team
+
+## Draft clarification request (not sent)
+
+**Subject:** Reuse and field-display clarification for the 2025 California Data Broker Registry CSV
+
+Hello CPPA team,
+
+We are developing Unlisted, a public privacy-intelligence directory that links to official sources and labels registry entries as broker-reported. We are reviewing the 2025 Data Broker Registry CSV before storing or displaying any submitted values.
+
+Could you clarify whether CPPA permits third parties, including a commercially hosted public directory, to store and republish selected values from this CSV? Our proposed initial projection is limited to the business name (A), a nonblank DBA (B), the primary business website (C), and the CCPA consumer-rights/deletion URL (O). We would attribute those fields to CPPA and label them as 2025 broker submissions. We would exclude contact details, physical addresses, statutory coverage details, request metrics, and free-text explanations.
+
+Does the registry CSV or registration form have additional terms that govern reuse of submitted responses? Is there a preferred attribution or correction process? We will honor the CSV instruction not to surface the specified fields when unanswered.
+
+Thank you,
+Unlisted project team

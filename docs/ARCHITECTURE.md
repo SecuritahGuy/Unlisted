@@ -10,6 +10,7 @@ This is a domain map and initial runtime recommendation. See [decision 0001](dec
 - `migrations/0001_initial.sql` drafts the first D1 tables for sources, ingestion runs, immutable observations, broker identities, aliases, and registrations.
 - The CPPA source remains marked for license review. Do not persist or publish its records until reuse terms are approved and represented in source metadata.
 - The live CPPA 2025 snapshot validated 543 rows on 2026-10-03. It is historical, contains some metrics labeled 2023, and has no dataset-specific reuse statement identified yet. Stable source keys and field-level storage/display rules must be decided before persistent ingestion.
+- `migrations/0003_reviewed_field_storage.sql` adds append-only field-policy decisions, a minimized observation table without raw payloads, a constrained field-value table, and a verified public view. CPPA policies are seeded pending, and a trigger blocks full-row storage without explicit full-payload approval. The full-row `source_observations` path remains unsuitable for CPPA until that approval is explicit.
 
 ## Recommended runtime direction
 

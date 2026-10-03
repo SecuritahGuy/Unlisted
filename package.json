@@ -10,6 +10,7 @@
     "cf:types": "wrangler types",
     "ingest:cppa:preview": "node scripts/preview-cppa-2025.mjs --dry-run",
     "test:ingestion": "node --test tests/ingestion/*.test.mjs",
+    "test:d1-schema": "node --test tests/schema/*.test.mjs",
     "deploy": "npm run build && wrangler deploy",
     "format": "prettier --write index.html src data scripts tests README.md docs/ARCHITECTURE.md docs/research/cppa-2025.md docs/research/cppa-2025-field-review.md vite.config.ts tsconfig.json wrangler.jsonc package.json .github/workflows/checks.yml",
     "format:check": "prettier --check index.html src data scripts tests README.md docs/ARCHITECTURE.md docs/research/cppa-2025.md docs/research/cppa-2025-field-review.md vite.config.ts tsconfig.json wrangler.jsonc package.json .github/workflows/checks.yml"
