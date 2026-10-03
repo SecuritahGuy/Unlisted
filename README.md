@@ -13,7 +13,7 @@ Unlisted is a privacy-intelligence project for building a trustworthy, provenanc
 
 ## Current status
 
-The initial website is a source-planning directory. It does not claim that broker records have been ingested or verified yet. The recommended runtime direction is TypeScript on Cloudflare Workers, with D1 for relational registry data and R2 for permitted raw source snapshots. The GitHub repository is the source of truth; Cloudflare serves the website. See the [runtime decision record](docs/decisions/0001-cloudflare-runtime.md), [roadmap](docs/ROADMAP.md), and [architecture notes](docs/ARCHITECTURE.md).
+The website includes a source-planning directory and five manually reviewed request-path examples for Epsilon and LexisNexis Risk Solutions. It is not yet a complete broker registry and does not claim those examples are registered in Vermont or Oregon. It does not store user profiles or submit privacy requests. The recommended runtime direction is TypeScript on Cloudflare Workers, with D1 for approved relational registry data and R2 for permitted raw source snapshots. The GitHub repository is the source of truth; Cloudflare serves the website. See the [runtime decision record](docs/decisions/0001-cloudflare-runtime.md), [roadmap](docs/ROADMAP.md), [architecture notes](docs/ARCHITECTURE.md), and [registry-source priority review](docs/research/registry-source-priority.md).
 
 ## Local development
 
@@ -40,6 +40,8 @@ Create a production build with `npm run build`. Connect the GitHub repository to
 
 The first D1 schema draft is in `migrations/0001_initial.sql`; source connector types and input validation are in `src/ingestion/`. A connector emits immutable source observations and does not execute privacy requests. Before applying the migration, create the D1 database and add its binding/database ID to `wrangler.jsonc`; keep production IDs and secrets out of Git.
 
-The CPPA 2025 connector can be previewed with `npm run ingest:cppa:preview`. It downloads and validates the CSV, then prints aggregate run metadata without retaining broker values or writing to D1. The source remains `review-required`; persistence must wait for documented reuse approval and an approved field mapping. Run its offline deterministic checks with `npm run test:ingestion`.
+The CPPA 2025 connector can be previewed with `npm run ingest:cppa:preview`. It downloads and validates the CSV, then prints aggregate run metadata without retaining broker values or writing to D1. The source remains `review-required`; persistence must wait for documented reuse approval and an approved field mapping. Current state-registry research found CPPA is the strongest technical bulk-ingestion candidate, while Oregon, Texas, and Vermont need human-assisted lookup or access clarification. See the [source priority review](docs/research/registry-source-priority.md). Run deterministic checks with `npm run test:ingestion`.
+
+Public request-path evidence is separately modeled and validated under `src/workflows/`. The sample records are linked from the website, have no user-submitted data, and do not imply that the broker's full practices or every request route were verified. Run their checks with `npm run test:workflows`.
 
 Migration `0003_reviewed_field_storage.sql` adds an append-only policy ledger and a minimized observation path with no raw-row payload. CPPA's proposed fields are seeded as pending, and full-row writes are blocked unless a separate full-payload policy is approved. The migration does not approve reuse or ingest registry records; a public database view also requires approved source and field policies plus a verified broker. Run `npm run test:d1-schema` to validate the local migration and its fail-closed database triggers.

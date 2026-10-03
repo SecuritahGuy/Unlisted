@@ -62,8 +62,9 @@ const navItems: { id: View; label: string; glyph: string; badge?: string }[] = [
 
 const actionLabels: Record<PrivacyAction, string> = {
   delete: 'Delete personal data',
-  suppress: 'Suppress a specific listing',
+  suppress: 'Request a safety-based suppression',
   opt_out_sale_sharing: 'Opt out of sale or sharing',
+  opt_out_direct_marketing: 'Opt out of direct marketing',
   opt_out_targeted_ads: 'Opt out of targeted ads',
   limit_sensitive_use: 'Limit sensitive data use',
   access: 'Request a copy of data',
@@ -78,8 +79,14 @@ const brokerLabels: Record<string, string> = {
 
 function workflowCard(workflow: PublicWorkflowEvidenceV1): string {
   const sourceHost = new URL(workflow.evidence.sourceUrl).hostname;
+  const reviewLabel =
+    workflow.reviewStatus === 'stale'
+      ? 'Needs recheck'
+      : workflow.reviewStatus === 'human_verified'
+        ? `Reviewed ${formatObservedDate(workflow.evidence.observedAt)}`
+        : 'Not verified';
   return `<article class="workflow-card">
-    <div class="workflow-card-top"><span class="workflow-broker">${escapeHtml(brokerLabels[workflow.subject.id] ?? workflow.subject.id)}</span><span class="workflow-reviewed">${workflow.reviewStatus === 'human_verified' ? 'Reviewed Oct 3, 2026' : 'Review needed'}</span></div>
+    <div class="workflow-card-top"><span class="workflow-broker">${escapeHtml(brokerLabels[workflow.subject.id] ?? workflow.subject.id)}</span><span class="workflow-reviewed">${escapeHtml(reviewLabel)}</span></div>
     <h2>${escapeHtml(actionLabels[workflow.action])}</h2>
     <div class="workflow-route">${escapeHtml(workflow.channel.replaceAll('_', ' '))}${workflow.jurisdiction ? ` · ${escapeHtml(workflow.jurisdiction)}` : ''}</div>
     <dl class="workflow-details">
@@ -93,7 +100,10 @@ function workflowCard(workflow: PublicWorkflowEvidenceV1): string {
 }
 
 function workflowsPage(): string {
-  return `<section class="page-intro"><div class="eyebrow">REQUEST PATHS <span class="eyebrow-count">${workflowSamples.length.toString().padStart(2, '0')} REVIEWED EXAMPLES</span></div><h1>One action<br /><em>at a time.</em></h1><p>These examples show how broker privacy routes differ. Read the scope and requirements, then continue directly with the provider. Unlisted does not submit requests.</p></section>
+  const verifiedCount = workflowSamples.filter(
+    (item) => item.reviewStatus === 'human_verified',
+  ).length;
+  return `<section class="page-intro"><div class="eyebrow">REQUEST PATHS <span class="eyebrow-count">${verifiedCount.toString().padStart(2, '0')} REVIEWED EXAMPLES</span></div><h1>One action<br /><em>at a time.</em></h1><p>These examples show how broker privacy routes differ. Read the scope and requirements, then continue directly with the provider. Unlisted does not submit requests.</p></section>
   <section class="workflow-list">${workflowSamples.map(workflowCard).join('')}</section>
   <aside class="workflow-disclaimer"><strong>Research sample, not a complete directory.</strong><span>Broker instructions can change. Vermont and Oregon broker-specific registry membership still needs interactive human verification. The state searches were not bypassed.</span></aside>`;
 }
@@ -174,6 +184,13 @@ function safeExternalUrl(value: string): string {
   }
 }
 
+function formatObservedDate(value: string): string {
+  return new Intl.DateTimeFormat('en-US', {
+    dateStyle: 'medium',
+    timeZone: 'UTC',
+  }).format(new Date(value));
+}
+
 async function loadPublicDirectoryData(): Promise<void> {
   try {
     const [sourcesResponse, summaryResponse] = await Promise.all([
@@ -201,7 +218,7 @@ async function loadPublicDirectoryData(): Promise<void> {
   }
 }
 
-function render(): void {
+function render(focusHeading = false): void {
   const content =
     activeView === 'sources'
       ? sourcesPage()
@@ -211,7 +228,10 @@ function render(): void {
           ? methodPage()
           : overview();
   document.querySelector<HTMLDivElement>('#app')!.innerHTML =
-    `<div class="app-shell"><aside class="sidebar"><a class="brand" href="#overview" data-view="overview"><span class="brand-mark"><span></span><span></span><span></span></span><span>unlisted<span class="brand-period">.</span></span></a><div class="workspace-label">PUBLIC DIRECTORY</div><nav class="main-nav" aria-label="Main navigation">${navItems.map((item) => `<button class="nav-item ${activeView === item.id ? 'active' : ''}" data-view="${item.id}"><span class="nav-glyph">${icon(item.glyph, 17)}</span><span>${item.label}</span>${item.badge ? `<span class="nav-badge">${item.badge}</span>` : ''}</button>`).join('')}</nav><div class="sidebar-bottom"><div class="sidebar-status"><span class="status-mark"><span></span></span><div><strong>Research phase</strong><small>Registry ingestion next</small></div></div><a href="https://github.com/SecuritahGuy/Unlisted" class="github-link" target="_blank" rel="noreferrer">Open project on GitHub ${icon('external', 14)}</a><div class="sidebar-foot">BUILT FOR CLARITY <span>·</span> 2026</div></div></aside><main class="main-content"><header class="topbar"><div class="breadcrumb"><span>UNLISTED</span>${icon('chevron', 13)}<strong>${activeView === 'overview' ? 'Overview' : activeView === 'sources' ? 'Source library' : activeView === 'workflows' ? 'Request paths' : 'Our method'}</strong></div><div class="topbar-right"><span class="public-badge"><span></span> RESEARCH PREVIEW</span><button class="mobile-menu" aria-label="Open navigation">${icon('menu', 19)}</button><div class="avatar">U</div></div></header><div class="content-wrap">${content}<footer class="page-footer"><span>UNLISTED © 2026</span><span>Privacy intelligence, with receipts.</span><a href="https://github.com/SecuritahGuy/Unlisted" target="_blank" rel="noreferrer">Open source project ${icon('external', 13)}</a></footer></div></main></div>`;
+    `<div class="app-shell"><aside class="sidebar"><a class="brand" href="#overview" data-view="overview"><span class="brand-mark"><span></span><span></span><span></span></span><span>unlisted<span class="brand-period">.</span></span></a><div class="workspace-label">PUBLIC DIRECTORY</div><nav class="main-nav" aria-label="Main navigation">${navItems.map((item) => `<button class="nav-item ${activeView === item.id ? 'active' : ''}" data-view="${item.id}" ${activeView === item.id ? 'aria-current="page"' : ''}><span class="nav-glyph">${icon(item.glyph, 17)}</span><span>${item.label}</span>${item.badge ? `<span class="nav-badge">${item.badge}</span>` : ''}</button>`).join('')}</nav><div class="sidebar-bottom"><div class="sidebar-status"><span class="status-mark"><span></span></span><div><strong>Research phase</strong><small>Registry ingestion next</small></div></div><a href="https://github.com/SecuritahGuy/Unlisted" class="github-link" target="_blank" rel="noreferrer">Open project on GitHub ${icon('external', 14)}</a><div class="sidebar-foot">BUILT FOR CLARITY <span>·</span> 2026</div></div></aside><main class="main-content"><header class="topbar"><div class="breadcrumb"><span>UNLISTED</span>${icon('chevron', 13)}<strong>${activeView === 'overview' ? 'Overview' : activeView === 'sources' ? 'Source library' : activeView === 'workflows' ? 'Request paths' : 'Our method'}</strong></div><div class="topbar-right"><span class="public-badge"><span></span> RESEARCH PREVIEW</span><button class="mobile-menu" aria-label="Open navigation">${icon('menu', 19)}</button><div class="avatar">U</div></div></header><div class="content-wrap">${content}<footer class="page-footer"><span>UNLISTED © 2026</span><span>Privacy intelligence, with receipts.</span><a href="https://github.com/SecuritahGuy/Unlisted" target="_blank" rel="noreferrer">Open source project ${icon('external', 13)}</a></footer></div></main></div>`;
+  const pageHeading = document.querySelector<HTMLElement>('.content-wrap h1');
+  pageHeading?.setAttribute('tabindex', '-1');
+  if (focusHeading) pageHeading?.focus({ preventScroll: true });
   bindEvents();
 }
 
@@ -221,7 +241,7 @@ function bindEvents(): void {
       event.preventDefault();
       activeView = element.dataset.view as View;
       if (activeView !== 'overview') searchTerm = '';
-      render();
+      render(true);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }),
   );

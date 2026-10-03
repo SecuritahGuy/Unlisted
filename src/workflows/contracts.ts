@@ -3,6 +3,7 @@ export type PrivacyAction =
   | 'delete'
   | 'suppress'
   | 'opt_out_sale_sharing'
+  | 'opt_out_direct_marketing'
   | 'opt_out_targeted_ads'
   | 'limit_sensitive_use'
   | 'access'
@@ -44,6 +45,7 @@ const actionValues: PrivacyAction[] = [
   'delete',
   'suppress',
   'opt_out_sale_sharing',
+  'opt_out_direct_marketing',
   'opt_out_targeted_ads',
   'limit_sensitive_use',
   'access',

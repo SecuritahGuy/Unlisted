@@ -25,7 +25,7 @@ test('curated samples are valid and distinguish actions and scopes', () => {
     workflowSamples.map(({ subject, action }) => `${subject.id}:${action}`),
     [
       'epsilon:delete',
-      'epsilon:opt_out_sale_sharing',
+      'epsilon:opt_out_direct_marketing',
       'lexisnexis-risk-solutions:opt_out_sale_sharing',
       'lexisnexis-risk-solutions:delete',
       'lexisnexis-risk-solutions:suppress',
