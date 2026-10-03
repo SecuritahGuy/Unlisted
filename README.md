@@ -13,7 +13,7 @@ Unlisted is a privacy-intelligence project for building a trustworthy, provenanc
 
 ## Current status
 
-The website includes a source-planning directory and five manually reviewed request-path examples for Epsilon and LexisNexis Risk Solutions. It is not yet a complete broker registry and does not claim those examples are registered in Vermont or Oregon. It does not store user profiles or submit privacy requests. The recommended runtime direction is TypeScript on Cloudflare Workers, with D1 for approved relational registry data and R2 for permitted raw source snapshots. The GitHub repository is the source of truth; Cloudflare serves the website. See the [runtime decision record](docs/decisions/0001-cloudflare-runtime.md), [roadmap](docs/ROADMAP.md), [architecture notes](docs/ARCHITECTURE.md), and [registry-source priority review](docs/research/registry-source-priority.md).
+The website includes a source-planning directory and ten manually reviewed request-path examples for Epsilon, LexisNexis Risk Solutions, Melissa Data Corporation, Common Room, and FullEnrich. These are first-party workflow examples, not a complete registry or state-registration claims. It does not store user profiles or submit privacy requests. The recommended runtime direction is TypeScript on Cloudflare Workers, with D1 for approved relational registry data and R2 for permitted raw source snapshots. The GitHub repository is the source of truth; Cloudflare serves the website. See the [runtime decision record](docs/decisions/0001-cloudflare-runtime.md), [roadmap](docs/ROADMAP.md), [architecture notes](docs/ARCHITECTURE.md), and [registry-source priority review](docs/research/registry-source-priority.md).
 
 ## Local development
 

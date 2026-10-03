@@ -111,6 +111,116 @@ export const workflowSamples: PublicWorkflowEvidenceV1[] = [
     },
     reviewStatus: 'human_verified',
   },
+  {
+    schemaVersion: 1,
+    evidenceId: 'melissa-data-delete-v1',
+    subject: { kind: 'broker', id: 'melissa-data-corporation' },
+    jurisdiction: 'United States; Melissa says any individual may request',
+    action: 'delete',
+    channel: 'web_form',
+    destinationUrl: 'https://apps.melissa.com/user/consumerprivacy.aspx',
+    scopeSummary:
+      'Melissa says any individual may request deletion of their personal information from Melissa Lookups and its other database products.',
+    agentSupport: 'unclear',
+    verificationSummary:
+      'Melissa says it verifies identity. It describes proportionate checks and says it does not require government ID for simple opt-out requests; higher-risk access requests may need more authentication.',
+    limitationsSummary:
+      'Applies to data in Melissa’s products, not other companies’ databases. Melissa may retain records needed to honor requests or meet legal duties.',
+    evidence: {
+      sourceUrl: 'https://www.melissa.com/state-law-privacy-notice',
+      sourceKind: 'broker_privacy_notice',
+      observedAt: '2026-10-03T00:00:00.000Z',
+    },
+    reviewStatus: 'human_verified',
+  },
+  {
+    schemaVersion: 1,
+    evidenceId: 'melissa-data-sale-optout-v1',
+    subject: { kind: 'broker', id: 'melissa-data-corporation' },
+    jurisdiction: 'United States; Melissa says any individual may request',
+    action: 'opt_out_sale_sharing',
+    channel: 'web_form',
+    destinationUrl: 'https://apps.melissa.com/user/consumerprivacy.aspx',
+    scopeSummary:
+      'Melissa says any individual may request to opt out of sale or sharing of personal information in Melissa Lookups and its other database products.',
+    agentSupport: 'unclear',
+    verificationSummary:
+      'Melissa says it verifies identity and honors recognized opt-out preference signals, including Global Privacy Control, for the applicable browser.',
+    limitationsSummary:
+      'The request affects Melissa’s processing only. It does not remove information held by other companies.',
+    evidence: {
+      sourceUrl: 'https://www.melissa.com/state-law-privacy-notice',
+      sourceKind: 'broker_privacy_notice',
+      observedAt: '2026-10-03T00:00:00.000Z',
+    },
+    reviewStatus: 'human_verified',
+  },
+  {
+    schemaVersion: 1,
+    evidenceId: 'common-room-prospector-sale-optout-v1',
+    subject: { kind: 'broker', id: 'common-room' },
+    jurisdiction: 'United States; rights depend on applicable law',
+    action: 'opt_out_sale_sharing',
+    channel: 'web_form',
+    destinationUrl: 'https://app.commonroom.io/remove-my-info',
+    scopeSummary:
+      'Common Room says its Prospector product provides business contact information to customers and that, where applicable law gives the right, a person may request that it not sell their data.',
+    agentSupport: 'unclear',
+    verificationSummary:
+      'Common Room says it will take steps to verify identity before fulfilling a request.',
+    limitationsSummary:
+      'This route concerns Common Room’s Prospector data. Its privacy notice excludes customer data processed on behalf of customers; requests about that data go to the relevant customer.',
+    evidence: {
+      sourceUrl: 'https://www.commonroom.io/privacy-policy/',
+      sourceKind: 'broker_privacy_notice',
+      observedAt: '2026-10-03T00:00:00.000Z',
+    },
+    reviewStatus: 'human_verified',
+  },
+  {
+    schemaVersion: 1,
+    evidenceId: 'fullenrich-delete-v1',
+    subject: { kind: 'broker', id: 'fullenrich' },
+    jurisdiction: 'United States; rights depend on applicable law',
+    action: 'delete',
+    channel: 'web_form',
+    destinationUrl: 'https://dsar.fullenrich.com/',
+    scopeSummary:
+      'FullEnrich’s privacy-rights form offers a request to delete personal data from its systems.',
+    agentSupport: 'unclear',
+    verificationSummary:
+      'The form requires an email address and phone number and says it uses dual verification before processing the request.',
+    limitationsSummary:
+      'This is a request to FullEnrich about data in its systems; it does not promise removal from other companies or downstream copies.',
+    evidence: {
+      sourceUrl: 'https://dsar.fullenrich.com/',
+      sourceKind: 'broker_request_portal',
+      observedAt: '2026-10-03T00:00:00.000Z',
+    },
+    reviewStatus: 'human_verified',
+  },
+  {
+    schemaVersion: 1,
+    evidenceId: 'fullenrich-sale-optout-v1',
+    subject: { kind: 'broker', id: 'fullenrich' },
+    jurisdiction: 'United States; rights depend on applicable law',
+    action: 'opt_out_sale_sharing',
+    channel: 'web_form',
+    destinationUrl: 'https://dsar.fullenrich.com/',
+    scopeSummary:
+      'FullEnrich’s privacy-rights form offers a sale/sharing opt-out and says a submitted opt-out request adds the person to its opt-out list.',
+    agentSupport: 'unclear',
+    verificationSummary:
+      'The form requires an email address and phone number and says it uses dual verification before processing the request.',
+    limitationsSummary:
+      'This is an opt-out from FullEnrich’s sale or sharing; it does not remove information held by other companies.',
+    evidence: {
+      sourceUrl: 'https://dsar.fullenrich.com/',
+      sourceKind: 'broker_request_portal',
+      observedAt: '2026-10-03T00:00:00.000Z',
+    },
+    reviewStatus: 'human_verified',
+  },
 ];
 
 for (const sample of workflowSamples) validatePublicWorkflowEvidence(sample);

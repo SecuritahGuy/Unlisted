@@ -20,7 +20,7 @@ const validEvidence = () => ({
 });
 
 test('curated samples are valid and distinguish actions and scopes', () => {
-  assert.equal(workflowSamples.length, 5);
+  assert.equal(workflowSamples.length, 10);
   assert.deepEqual(
     workflowSamples.map(({ subject, action }) => `${subject.id}:${action}`),
     [
@@ -29,6 +29,11 @@ test('curated samples are valid and distinguish actions and scopes', () => {
       'lexisnexis-risk-solutions:opt_out_sale_sharing',
       'lexisnexis-risk-solutions:delete',
       'lexisnexis-risk-solutions:suppress',
+      'melissa-data-corporation:delete',
+      'melissa-data-corporation:opt_out_sale_sharing',
+      'common-room:opt_out_sale_sharing',
+      'fullenrich:delete',
+      'fullenrich:opt_out_sale_sharing',
     ],
   );
   for (const sample of workflowSamples)

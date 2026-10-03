@@ -4,7 +4,7 @@ This is a domain map and initial runtime recommendation. See [decision 0001](dec
 
 ## Implemented foundation
 
-- The public site presents the source candidates and project method, plus five manually reviewed request-path examples for Epsilon and LexisNexis Risk Solutions. These examples are broker-level public workflow evidence, not registry membership claims; no user profiles or request payloads are stored or submitted.
+- The public site presents the source candidates and project method, plus ten manually reviewed request-path examples for Epsilon, LexisNexis Risk Solutions, Melissa Data Corporation, Common Room, and FullEnrich. These examples are first-party broker workflow evidence, not state registration claims; no user profiles or request payloads are stored or submitted.
 - `src/workflows/contracts.ts` defines versioned, read-only public workflow evidence separately from source-registration observations. Runtime validation rejects unknown properties to keep consumer request data out of this public evidence type; curated first-party examples live in `src/workflows/samples.ts`.
 - State-source feasibility research is recorded in `docs/research/registry-source-priority.md`: CPPA is the strongest bulk-source candidate, but its reuse terms remain unresolved; Vermont/Texas lookup is currently manual, and Oregon requires interactive CAPTCHA. Do not persist or publish registry-derived broker records until reuse terms are recorded.
 - `src/ingestion/contracts.ts` defines source manifests, immutable observations, connector boundaries, and normalized broker candidates.

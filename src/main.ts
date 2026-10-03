@@ -75,6 +75,9 @@ const actionLabels: Record<PrivacyAction, string> = {
 const brokerLabels: Record<string, string> = {
   epsilon: 'Epsilon',
   'lexisnexis-risk-solutions': 'LexisNexis Risk Solutions',
+  'melissa-data-corporation': 'Melissa Data Corporation',
+  'common-room': 'Common Room, Inc.',
+  fullenrich: 'FullEnrich Corp',
 };
 
 function workflowCard(workflow: PublicWorkflowEvidenceV1): string {
@@ -105,7 +108,7 @@ function workflowsPage(): string {
   ).length;
   return `<section class="page-intro"><div class="eyebrow">REQUEST PATHS <span class="eyebrow-count">${verifiedCount.toString().padStart(2, '0')} REVIEWED EXAMPLES</span></div><h1>One action<br /><em>at a time.</em></h1><p>These examples show how broker privacy routes differ. Read the scope and requirements, then continue directly with the provider. Unlisted does not submit requests.</p></section>
   <section class="workflow-list">${workflowSamples.map(workflowCard).join('')}</section>
-  <aside class="workflow-disclaimer"><strong>Research sample, not a complete directory.</strong><span>Broker instructions can change. Vermont and Oregon broker-specific registry membership still needs interactive human verification. The state searches were not bypassed.</span></aside>`;
+  <aside class="workflow-disclaimer"><strong>Research sample, not a complete directory.</strong><span>Broker instructions can change. These cards summarize first-party request routes and do not claim current state registration. Vermont and Oregon registry searches need interactive human verification; we did not bypass those checks.</span></aside>`;
 }
 
 function sourceCard(source: SourceRecord, index: number): string {
