@@ -1,9 +1,20 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "unlisted",
+  "main": "src/worker.ts",
   "compatibility_date": "2026-10-03",
   "assets": {
     "directory": "./dist",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*"],
     "not_found_handling": "404-page",
   },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "unlisted-dev",
+      "database_id": "7e06686a-71a6-460d-ac59-20b0cd14e776",
+      "migrations_dir": "migrations",
+    },
+  ],
 }

@@ -9,6 +9,7 @@ CREATE TABLE sources (
     'government-registry', 'government-archive', 'open-dataset', 'research-reference'
   )),
   jurisdiction TEXT,
+  description TEXT NOT NULL,
   source_url TEXT NOT NULL,
   license_status TEXT NOT NULL DEFAULT 'unknown' CHECK (license_status IN (
     'unknown', 'review-required', 'approved', 'restricted', 'prohibited'

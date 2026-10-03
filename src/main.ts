@@ -1,10 +1,38 @@
-import { sources, type SourceKind, type SourceRecord } from '../data/sources';
+import { sources as fallbackSources, type SourceKind, type SourceRecord } from '../data/sources';
 import './style.css';
 
 type View = 'overview' | 'sources' | 'method';
 let activeView: View = 'overview';
 let activeFilter = 'All sources';
 let searchTerm = '';
+let sourceCatalog: SourceRecord[] = [...fallbackSources];
+let verifiedBrokerCount: number | null = null;
+
+interface ApiSource {
+  source_id: string;
+  name: string;
+  publisher: string;
+  source_kind: 'government-registry' | 'government-archive' | 'open-dataset' | 'research-reference';
+  jurisdiction: string | null;
+  description: string;
+  source_url: string;
+  license_status: 'unknown' | 'review-required' | 'approved' | 'restricted' | 'prohibited';
+}
+
+const kindLabels: Record<ApiSource['source_kind'], SourceKind> = {
+  'government-registry': 'Government registry',
+  'government-archive': 'Government archive',
+  'open-dataset': 'Open dataset',
+  'research-reference': 'Research reference',
+};
+
+const licenseLabels: Record<ApiSource['license_status'], string> = {
+  unknown: 'License unknown',
+  'review-required': 'License review needed',
+  approved: 'Reuse approved',
+  restricted: 'Restricted use',
+  prohibited: 'Reuse prohibited',
+};
 
 const icon = (name: string, size = 18) => {
   const paths: Record<string, string> = {
@@ -25,7 +53,7 @@ const icon = (name: string, size = 18) => {
 
 const navItems: { id: View; label: string; glyph: string; badge?: string }[] = [
   { id: 'overview', label: 'Overview', glyph: 'grid' },
-  { id: 'sources', label: 'Source library', glyph: 'layers', badge: `${sources.length}` },
+  { id: 'sources', label: 'Source library', glyph: 'layers', badge: `${sourceCatalog.length}` },
   { id: 'method', label: 'Our method', glyph: 'route' },
 ];
 
@@ -36,17 +64,18 @@ function sourceCard(source: SourceRecord, index: number): string {
       : source.kind === 'Research reference'
         ? 'research'
         : 'open';
+  const safeHref = safeExternalUrl(source.href);
   return `<article class="source-row" style="--row:${index}">
     <div class="source-mark ${kindClass}">${source.kind.startsWith('Government') ? 'G' : source.kind === 'Open dataset' ? 'O' : 'R'}</div>
-    <div class="source-main"><div class="source-title-line"><h3>${source.name}</h3><span class="source-region">${source.region}</span></div><p>${source.organization}</p><span class="source-description">${source.description}</span></div>
-    <div class="source-class"><span class="kind-pill ${kindClass}">${source.kind}</span><span class="signal">${source.signal}</span></div>
-    <a class="source-link" href="${source.href}" target="_blank" rel="noreferrer" aria-label="Open ${source.name} source">${icon('external', 16)}</a>
+    <div class="source-main"><div class="source-title-line"><h3>${escapeHtml(source.name)}</h3><span class="source-region">${escapeHtml(source.region)}</span></div><p>${escapeHtml(source.organization)}</p><span class="source-description">${escapeHtml(source.description)}</span></div>
+    <div class="source-class"><span class="kind-pill ${kindClass}">${escapeHtml(source.kind)}</span><span class="signal">${escapeHtml(source.signal)}</span></div>
+    <a class="source-link" href="${escapeHtml(safeHref)}" target="_blank" rel="noreferrer" aria-label="Open ${escapeHtml(source.name)} source">${icon('external', 16)}</a>
   </article>`;
 }
 
 function filteredSources(): SourceRecord[] {
   const q = searchTerm.trim().toLowerCase();
-  return sources.filter((s) => {
+  return sourceCatalog.filter((s) => {
     const matchesFilter =
       activeFilter === 'All sources' ||
       (activeFilter === 'Government'
@@ -71,7 +100,7 @@ function sourceList(): string {
 
 function overview(): string {
   return `<section class="welcome-row"><div><div class="eyebrow"><span class="live-dot"></span> THE OPEN PRIVACY INDEX</div><h1>Know where your data<br /><em>travels.</em></h1><p class="hero-copy">A clearer view of the companies collecting personal information—and the paths people can take to get it back.</p><div class="hero-actions"><button class="button button-dark" data-view="sources">Explore the sources ${icon('arrow', 16)}</button><a class="text-link" href="#method" data-view="method">How we build this ${icon('chevron', 15)}</a></div></div><div class="hero-art" aria-label="Abstract map of connected data sources"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="orbit orbit-three"></div><div class="art-core"><span class="core-dot"></span><span>YOUR DATA</span></div><div class="art-node node-a">${icon('layers', 18)}</div><div class="art-node node-b">CA</div><div class="art-node node-c">OR</div><div class="art-node node-d">TX</div><div class="art-node node-e">VT</div><div class="art-caption">ONE PERSON. MANY TRAILS.</div></div></section>
-  <section class="metrics" aria-label="Project progress"><article class="metric-card"><span class="metric-label">SOURCES IDENTIFIED</span><div class="metric-value">09<span class="metric-unit">sources</span></div><div class="metric-foot"><span class="metric-icon green">${icon('layers', 16)}</span> Across public registries &amp; directories</div></article><article class="metric-card"><span class="metric-label">JURISDICTIONS IN SCOPE</span><div class="metric-value">04<span class="metric-unit">states</span></div><div class="metric-foot"><span class="metric-icon">${icon('route', 16)}</span> CA · OR · TX · VT</div></article><article class="metric-card metric-progress"><span class="metric-label">VERIFIED BROKER RECORDS</span><div class="metric-value">—<span class="metric-unit">in progress</span></div><div class="progress-track"><span></span></div><div class="metric-foot">Registry ingestion has not started</div></article></section>
+  <section class="metrics" aria-label="Project progress"><article class="metric-card"><span class="metric-label">SOURCES IDENTIFIED</span><div class="metric-value">${sourceCatalog.length.toString().padStart(2, '0')}<span class="metric-unit">sources</span></div><div class="metric-foot"><span class="metric-icon green">${icon('layers', 16)}</span> Across public registries &amp; directories</div></article><article class="metric-card"><span class="metric-label">JURISDICTIONS IN SCOPE</span><div class="metric-value">04<span class="metric-unit">states</span></div><div class="metric-foot"><span class="metric-icon">${icon('route', 16)}</span> CA · OR · TX · VT</div></article><article class="metric-card metric-progress"><span class="metric-label">VERIFIED BROKER RECORDS</span><div class="metric-value">${verifiedBrokerCount === null ? '—' : verifiedBrokerCount.toLocaleString()}<span class="metric-unit">${verifiedBrokerCount === null ? 'loading' : 'verified'}</span></div><div class="progress-track"><span></span></div><div class="metric-foot">${verifiedBrokerCount === 0 ? 'Registry ingestion has not started' : 'Only verified records from approved sources are counted'}</div></article></section>
   <section class="sources-section"><div class="section-heading"><div><div class="eyebrow">THE FOUNDATION</div><h2>Sources before shortcuts.</h2><p>Every useful record starts with knowing where it came from.</p></div><button class="button button-light" data-view="sources">View source library ${icon('arrow', 15)}</button></div>
   <div class="source-tools"><label class="search-box">${icon('search', 17)}<input id="source-search" type="search" placeholder="Search sources, states, publishers..." value="${escapeHtml(searchTerm)}" /></label><div class="filter-pills">${['All sources', 'Government', 'Open datasets', 'Research'].map((f) => `<button class="filter-pill ${activeFilter === f ? 'selected' : ''}" data-filter="${f}">${f}</button>`).join('')}</div></div>
   <div id="source-results">${sourceList()}</div></section>
@@ -79,7 +108,7 @@ function overview(): string {
 }
 
 function sourcesPage(): string {
-  return `<section class="page-intro"><div class="eyebrow">SOURCE LIBRARY <span class="eyebrow-count">${sources.length.toString().padStart(2, '0')} CANDIDATES</span></div><h1>Evidence has<br /><em>a starting point.</em></h1><p>These are the registries, directories, and research references identified for the first ingestion phase. Listing here does not mean a source has been ingested or approved for reuse.</p></section><section class="sources-section library-section"><div class="source-tools"><label class="search-box">${icon('search', 17)}<input id="source-search" type="search" placeholder="Search sources, states, publishers..." value="${escapeHtml(searchTerm)}" /></label><div class="filter-pills">${['All sources', 'Government', 'Open datasets', 'Research'].map((f) => `<button class="filter-pill ${activeFilter === f ? 'selected' : ''}" data-filter="${f}">${f}</button>`).join('')}</div></div><div id="source-results">${sourceList()}</div><div class="license-note"><span class="license-mark">i</span><p><strong>License review is part of ingestion.</strong> Open and research datasets can have reuse restrictions. We’ll record source terms before copying or redistributing data.</p></div></section>`;
+  return `<section class="page-intro"><div class="eyebrow">SOURCE LIBRARY <span class="eyebrow-count">${sourceCatalog.length.toString().padStart(2, '0')} CANDIDATES</span></div><h1>Evidence has<br /><em>a starting point.</em></h1><p>These are the registries, directories, and research references identified for the first ingestion phase. Listing here does not mean a source has been ingested or approved for reuse.</p></section><section class="sources-section library-section"><div class="source-tools"><label class="search-box">${icon('search', 17)}<input id="source-search" type="search" placeholder="Search sources, states, publishers..." value="${escapeHtml(searchTerm)}" /></label><div class="filter-pills">${['All sources', 'Government', 'Open datasets', 'Research'].map((f) => `<button class="filter-pill ${activeFilter === f ? 'selected' : ''}" data-filter="${f}">${f}</button>`).join('')}</div></div><div id="source-results">${sourceList()}</div><div class="license-note"><span class="license-mark">i</span><p><strong>License review is part of ingestion.</strong> Open and research datasets can have reuse restrictions. We’ll record source terms before copying or redistributing data.</p></div></section>`;
 }
 
 function methodPage(): string {
@@ -93,6 +122,42 @@ function escapeHtml(value: string): string {
       ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character] ??
       character,
   );
+}
+
+function safeExternalUrl(value: string): string {
+  try {
+    const parsed = new URL(value);
+    return parsed.protocol === 'https:' ? parsed.href : '#';
+  } catch {
+    return '#';
+  }
+}
+
+async function loadPublicDirectoryData(): Promise<void> {
+  try {
+    const [sourcesResponse, summaryResponse] = await Promise.all([
+      fetch('/api/sources'),
+      fetch('/api/summary'),
+    ]);
+    if (!sourcesResponse.ok || !summaryResponse.ok) return;
+    const sourceData = (await sourcesResponse.json()) as { sources: ApiSource[] };
+    const summary = (await summaryResponse.json()) as { verified_broker_count: number };
+    if (!Array.isArray(sourceData.sources)) return;
+    sourceCatalog = sourceData.sources.map((source) => ({
+      id: source.source_id,
+      name: source.name,
+      organization: source.publisher,
+      kind: kindLabels[source.source_kind],
+      region: source.jurisdiction ?? 'Multi-region',
+      description: source.description,
+      href: source.source_url,
+      signal: licenseLabels[source.license_status],
+    }));
+    verifiedBrokerCount = summary.verified_broker_count;
+    render();
+  } catch {
+    // The bundled catalog remains available if the API cannot be reached.
+  }
 }
 
 function render(): void {
@@ -139,3 +204,4 @@ function refreshSourceResults(): void {
 }
 
 render();
+void loadPublicDirectoryData();
