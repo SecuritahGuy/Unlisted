@@ -758,6 +758,56 @@ a {
   border-radius: 4px;
   color: #78836d;
 }
+.source-policy {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  border-top: 1px solid #eeede6;
+  margin-top: 5px;
+  padding-top: 8px;
+}
+.source-policy summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: #65734c;
+  font-size: 9px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.source-policy summary span {
+  color: #929588;
+  font: 8px var(--mono);
+  font-weight: 400;
+}
+.source-policy-body {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  padding: 12px 0 2px;
+}
+.source-policy-body strong {
+  color: #626b59;
+  font: 8px var(--mono);
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+.source-policy-body p {
+  margin: 4px 0 0;
+  color: #6e7469;
+  font-size: 9px;
+  line-height: 1.55;
+}
+.source-policy-body > a {
+  grid-column: 1 / -1;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  width: fit-content;
+  color: #68794a;
+  font-size: 9px;
+  font-weight: 600;
+}
 .source-link:hover {
   background: #eaf0dd;
   color: #52682e;
@@ -1257,6 +1307,15 @@ a {
     align-items: center;
     gap: 7px;
     padding-top: 6px;
+  }
+  .source-policy {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    margin-top: 3px;
+  }
+  .source-policy-body {
+    grid-template-columns: 1fr;
+    gap: 9px;
   }
   .source-link {
     grid-column: 3;

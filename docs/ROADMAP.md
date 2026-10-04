@@ -411,6 +411,8 @@ If 1,100 brokers ultimately use, say, 250 unique workflows, we've dramatically r
 
 # Proposed production database
 
+The person-specific tables below (`required_identifiers`, `removal_requests`, `removal_events`, and `monitoring_jobs`) are unapproved roadmap concepts. Do not implement them or add request forms until the security and privacy boundary in [decision 0002](decisions/0002-private-request-tracking-boundary.md) has a detailed implementation design and review.
+
 I would now change our original schema to something like:
 
 ```text

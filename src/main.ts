@@ -1,4 +1,5 @@
 import { sources as fallbackSources, type SourceKind, type SourceRecord } from '../data/sources';
+import { sourcePolicies } from '../data/source-policies';
 import { workflowSamples } from './workflows/samples';
 import type { PrivacyAction, PublicWorkflowEvidenceV1 } from './workflows/contracts';
 import './style.css';
@@ -112,6 +113,7 @@ function workflowsPage(): string {
 }
 
 function sourceCard(source: SourceRecord, index: number): string {
+  const policy = sourcePolicies[source.id];
   const kindClass =
     source.kind === 'Government registry' || source.kind === 'Government archive'
       ? 'government'
@@ -122,8 +124,9 @@ function sourceCard(source: SourceRecord, index: number): string {
   return `<article class="source-row" style="--row:${index}">
     <div class="source-mark ${kindClass}">${source.kind.startsWith('Government') ? 'G' : source.kind === 'Open dataset' ? 'O' : 'R'}</div>
     <div class="source-main"><div class="source-title-line"><h3>${escapeHtml(source.name)}</h3><span class="source-region">${escapeHtml(source.region)}</span></div><p>${escapeHtml(source.organization)}</p><span class="source-description">${escapeHtml(source.description)}</span></div>
-    <div class="source-class"><span class="kind-pill ${kindClass}">${escapeHtml(source.kind)}</span><span class="signal">${escapeHtml(source.signal)}</span></div>
+    <div class="source-class"><span class="kind-pill ${kindClass}">${escapeHtml(source.kind)}</span><span class="signal">${escapeHtml(policy?.reuseLabel ?? source.signal)}</span></div>
     <a class="source-link" href="${escapeHtml(safeHref)}" target="_blank" rel="noreferrer" aria-label="Open ${escapeHtml(source.name)} source">${icon('external', 16)}</a>
+    ${policy ? `<details class="source-policy"><summary>Access &amp; reuse review <span>Reviewed ${escapeHtml(formatObservedDate(policy.reviewedAt))}</span></summary><div class="source-policy-body"><div><strong>Access</strong><p>${escapeHtml(policy.accessSummary)}</p></div><div><strong>Reuse</strong><p>${escapeHtml(policy.reuseStatus)}</p></div><div><strong>Next step</strong><p>${escapeHtml(policy.nextStep)}</p></div><a href="${escapeHtml(safeExternalUrl(policy.evidenceUrl))}" target="_blank" rel="noreferrer">Open review evidence ${icon('external', 13)}</a></div></details>` : ''}
   </article>`;
 }
 

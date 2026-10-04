@@ -24,7 +24,7 @@ npm install
 npm run dev
 ```
 
-Create a production build with `npm run build`. Connect the GitHub repository to Cloudflare Workers Builds to deploy on pushes to `main`; the repository includes the Worker configuration and build scripts for that flow.
+Create a production build with `npm run build`. The GitHub Actions workflow checks formatting, ingestion/workflow/schema checks, and the website build on pull requests and pushes to `main`. Cloudflare Workers Builds is configured separately in the Cloudflare dashboard for deployment; it is not configured by the GitHub Actions workflow.
 
 ## Repository map
 
@@ -34,7 +34,7 @@ Create a production build with `npm run build`. Connect the GitHub repository to
 - `docs/decisions/` — architecture decision records as choices are made.
 - `src/` — website source.
 - `data/` — catalog metadata and, later, reviewed registry records.
-- `.github/workflows/` — GitHub automation, including Cloudflare deployment.
+- `.github/workflows/` — GitHub Actions checks; Cloudflare deployment is configured in the Cloudflare dashboard.
 
 ## Ingestion foundation
 

@@ -72,6 +72,8 @@ The roadmap's proposed table list is a useful candidate, not a locked schema. De
 7. Research high-priority removal workflows and shared providers; keep crawling read-only.
 8. Define security, consent, identity handling, and authorization requirements before implementing request execution.
 
+Person-specific request tracking has an additional gate in [decision 0002](decisions/0002-private-request-tracking-boundary.md). Its requirements must be turned into a reviewed implementation design before adding request forms, personal request tables, or submission adapters.
+
 ## Parallel work boundaries
 
 Once contracts are agreed, source connectors can be split by source (for example CPPA, Oregon, Texas, Vermont, and legacy California AG). Each connector should own its module and fixtures, emit the same versioned observation contract, and document refresh/licensing constraints. Entity resolution and shared schema changes should have one integrator to avoid conflicting assumptions.
