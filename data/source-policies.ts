@@ -100,3 +100,19 @@ export const sourcePolicies: Record<string, SourcePolicySummary> = {
     evidenceUrl: 'https://privacyrights.org/data-brokers',
   },
 };
+
+const sourceIdAliases: Record<string, string> = {
+  'cppa-2025': 'cppa',
+  'oregon-dfr': 'oregon',
+  'texas-sos': 'texas',
+  'vermont-sos': 'vermont',
+  'ca-ag-legacy': 'ca-ag',
+  'optoutrights-directory': 'optoutrights',
+  'cvs0-directory': 'cvs0',
+  'optery-directory': 'optery',
+  'prc-directory': 'prc',
+};
+
+export function getSourcePolicy(sourceId: string): SourcePolicySummary | undefined {
+  return sourcePolicies[sourceId] ?? sourcePolicies[sourceIdAliases[sourceId] ?? ''];
+}

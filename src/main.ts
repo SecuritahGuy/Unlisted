@@ -1,5 +1,5 @@
 import { sources as fallbackSources, type SourceKind, type SourceRecord } from '../data/sources';
-import { sourcePolicies } from '../data/source-policies';
+import { getSourcePolicy } from '../data/source-policies';
 import { workflowSamples } from './workflows/samples';
 import type { PrivacyAction, PublicWorkflowEvidenceV1 } from './workflows/contracts';
 import './style.css';
@@ -113,7 +113,7 @@ function workflowsPage(): string {
 }
 
 function sourceCard(source: SourceRecord, index: number): string {
-  const policy = sourcePolicies[source.id];
+  const policy = getSourcePolicy(source.id);
   const kindClass =
     source.kind === 'Government registry' || source.kind === 'Government archive'
       ? 'government'

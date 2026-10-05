@@ -12,9 +12,22 @@
   "d1_databases": [
     {
       "binding": "DB",
-      "database_name": "unlisted-dev",
-      "database_id": "7e06686a-71a6-460d-ac59-20b0cd14e776",
+      "database_name": "unlisted-production",
+      "database_id": "3ef81463-4c7e-45e6-bf50-e66979bdac2a",
       "migrations_dir": "migrations",
     },
   ],
+  "env": {
+    "development": {
+      "name": "unlisted-development",
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "unlisted-dev",
+          "database_id": "7e06686a-71a6-460d-ac59-20b0cd14e776",
+          "migrations_dir": "migrations",
+        },
+      ],
+    },
+  },
 }

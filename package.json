@@ -12,7 +12,7 @@
     "test:ingestion": "node --test tests/ingestion/*.test.mjs",
     "test:workflows": "node --test tests/workflows/*.test.mjs",
     "test:d1-schema": "node --test tests/schema/*.test.mjs",
-    "deploy": "npm run build && wrangler deploy",
+    "deploy": "npm run build && wrangler deploy --env=\"\"",
     "format": "prettier --write index.html src data scripts tests README.md docs/ARCHITECTURE.md docs/decisions/0002-private-request-tracking-boundary.md docs/research/cppa-2025.md docs/research/cppa-2025-field-review.md docs/research/data-broker-workflow-samples.md vite.config.ts tsconfig.json wrangler.jsonc package.json .github/workflows/checks.yml",
     "format:check": "prettier --check index.html src data scripts tests README.md docs/ARCHITECTURE.md docs/decisions/0002-private-request-tracking-boundary.md docs/research/cppa-2025.md docs/research/cppa-2025-field-review.md docs/research/data-broker-workflow-samples.md vite.config.ts tsconfig.json wrangler.jsonc package.json .github/workflows/checks.yml"
   },

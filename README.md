@@ -24,7 +24,7 @@ npm install
 npm run dev
 ```
 
-Create a production build with `npm run build`. The GitHub Actions workflow checks formatting, ingestion/workflow/schema checks, and the website build on pull requests and pushes to `main`. Cloudflare Workers Builds is configured separately in the Cloudflare dashboard for deployment; it is not configured by the GitHub Actions workflow.
+Create a production build with `npm run build`. The GitHub Actions workflow checks formatting, ingestion/workflow/schema checks, and the website build on pull requests and pushes to `main`. Cloudflare Workers Builds is configured separately in the Cloudflare dashboard for deployment; it is not configured by the GitHub Actions workflow. Set its deploy command to `npm run deploy` to build and explicitly deploy the top-level production Worker. Wrangler warns when multiple environments are configured and an unqualified deploy command is used.
 
 ## Repository map
 
@@ -38,7 +38,7 @@ Create a production build with `npm run build`. The GitHub Actions workflow chec
 
 ## Ingestion foundation
 
-The first D1 schema draft is in `migrations/0001_initial.sql`; source connector types and input validation are in `src/ingestion/`. A connector emits immutable source observations and does not execute privacy requests. Before applying the migration, create the D1 database and add its binding/database ID to `wrangler.jsonc`; keep production IDs and secrets out of Git.
+The first D1 schema draft is in `migrations/0001_initial.sql`; source connector types and input validation are in `src/ingestion/`. A connector emits immutable source observations and does not execute privacy requests. Wrangler's top-level production Worker (`unlisted`) now uses the `unlisted-production` D1 database; `--env development` targets a separate `unlisted-development` Worker backed by `unlisted-dev`. Local `wrangler dev` uses local storage by default. Use `wrangler dev --env development --remote` only when you intend to work against the separate remote development database. Apply future migrations to both databases before deploying: `wrangler d1 migrations apply DB --remote` and `wrangler d1 migrations apply DB --remote --env development`. The production D1 ID is configuration, not a credential; keep tokens and secrets out of Git.
 
 The CPPA 2025 connector can be previewed with `npm run ingest:cppa:preview`. It downloads and validates the CSV, then prints aggregate run metadata without retaining broker values or writing to D1. The source remains `review-required`; persistence must wait for documented reuse approval and an approved field mapping. Current state-registry research found CPPA is the strongest technical bulk-ingestion candidate, while Oregon, Texas, and Vermont need human-assisted lookup or access clarification. See the [source priority review](docs/research/registry-source-priority.md). Run deterministic checks with `npm run test:ingestion`.
 

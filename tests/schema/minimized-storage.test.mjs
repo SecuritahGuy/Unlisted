@@ -25,7 +25,7 @@ function execute(databasePath, sql) {
     wranglerOutput([
       'd1',
       'execute',
-      'unlisted-dev',
+      'DB',
       '--local',
       '--persist-to',
       databasePath,
@@ -43,7 +43,7 @@ test('D1 minimized storage migration fails closed and contains no raw row payloa
       'd1',
       'migrations',
       'apply',
-      'unlisted-dev',
+      'DB',
       '--local',
       '--persist-to',
       databasePath,
